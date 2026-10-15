@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  username            String     @unique
+  email               String
+  passwordHash        String
+  passwordSalt        String
+  currentStreak       Int        @default(0)
+  highestStreak        Int        @default(0)
+  lastLoginDate        DateTime?
+  preferredCategories String[]   @default([])
+  profileImage         Json       @default("{\"url\":\"https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg\",\"filename\":\"default-profile\"}")
+  bio                  String?    @db.VarChar(150)
+  feeds                Feed[]
+  reviews              Review[]
+  likes                FeedLike[]
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+}
+
+model Feed {
+  id        String     @id @default(cuid())
+  title     String
+  description String
+  image     Json       @default("{\"url\":\"/images/default.png\",\"filename\":\"default.png\"}")
+  category  String
+  likes     Int        @default(0)
+  info      String
+  ownerId   String?
+  owner     User?      @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  reviews   Review[]
+  likedBy   FeedLike[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([category])
+  @@index([ownerId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  comment   String
+  createdAt DateTime @default(now())
+  feedId    String
+  feed      Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([feedId])
+  @@index([authorId])
+}
+
+model FeedLike {
+  userId    String
+  feedId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feed      Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+  @@id([userId, feedId])
+  @@index([feedId])
+}

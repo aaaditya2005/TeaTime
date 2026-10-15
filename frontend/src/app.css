@@ -1,0 +1,100 @@
+.app-root a:not(.btn):not(.nav-link) {
+  color: #222222;
+  text-decoration: none;
+}
+
+.app-root a:not(.btn):not(.nav-link):hover,
+.app-root a:not(.btn):not(.nav-link):focus-visible {
+  color: #163e82;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1 0 auto;
+}
+
+.nav-actions {
+  position: relative;
+  align-items: center;
+}
+
+.account-toggle {
+  border: 0;
+  background: transparent;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.nav-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 1050;
+  display: grid;
+  min-width: 11rem;
+  padding: 0.4rem;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 0.4rem 1rem rgb(0 0 0 / 12%);
+}
+
+.account-menu a,
+.account-menu button {
+  padding: 0.55rem 0.7rem;
+  color: #222;
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+}
+
+.account-menu a:hover,
+.account-menu button:hover {
+  background: #f2f4f6;
+}
+
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap #password {
+  padding-right: 3rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  padding: 0;
+  color: #6c757d;
+  background: transparent;
+  border: 0;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 991.98px) {
+  .nav-actions {
+    align-items: flex-start;
+  }
+
+  .account-menu {
+    top: auto;
+    right: auto;
+    left: 3rem;
+  }
+}
