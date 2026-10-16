@@ -4,8 +4,8 @@ It's TeaTime is a cozy reading and community app made for the little pauses in y
 
 ## A little something for every cup
 
-- Discover daily reads across motivational, fitness, spiritual, and natural-fact topics.
-- Follow the categories you care about and make your feed feel more personal.
+- Discover daily reads across motivation, fitness, spirituality, nature, and culture & history.
+- Explore every category, with a featured daily post to make each visit feel welcoming and focused.
 - Share your own posts, add images, and join the conversation with likes and comments.
 - Catch up on current news and explore stories from different sources.
 - Ask the TeaTime AI assistant questions about a post and learn a little more.

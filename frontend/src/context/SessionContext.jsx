@@ -3,14 +3,6 @@ import { api } from "../services/api.js";
 
 const SessionContext = createContext(null);
 
-export const categoryOptions = [
-  ["motivational", "Motivational"],
-  ["fitness", "Fitness"],
-  ["spiritual", "Spiritual"],
-  ["natural-fact", "Natural Fact"],
-  ["news", "News"],
-];
-
 export function SessionProvider({ children }) {
   const [user, setUser] = useState(null);
   const [sessionReady, setSessionReady] = useState(false);

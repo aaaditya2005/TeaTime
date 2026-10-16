@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api.js";
 import { useSession } from "../context/SessionContext.jsx";
-import { CategoryCheckboxes, PageMessage, PostGrid, Loading } from "../components/Common.jsx";
+import { PageMessage, PostGrid, Loading } from "../components/Common.jsx";
 
 export function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -68,10 +68,8 @@ export function ProfileEditor() {
           {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={submit} encType="multipart/form-data">
             <div className="mb-3"><label htmlFor="username" className="form-label">Username</label><input id="username" name="username" className="form-control" defaultValue={user.username} required /></div>
-            <div className="mb-3"><label htmlFor="email" className="form-label">Email</label><input id="email" type="email" name="email" className="form-control" defaultValue={user.email} required /></div>
             <div className="mb-3"><h4>Current uploaded image</h4><img className="current-feed-img" src={user.profileImage?.url || "/images/default.png"} alt="Current profile" /></div>
             <div className="mb-3"><label htmlFor="profileImage" className="form-label">Profile Picture</label><input id="profileImage" type="file" name="profileImage" accept="image/png,image/jpeg" className="form-control" /></div>
-            <CategoryCheckboxes selected={user.preferredCategories || []} />
             <button className="custom-btn btn" id="save" disabled={saving}>{saving ? "Saving..." : "Save"}</button>
           </form>
         </div>

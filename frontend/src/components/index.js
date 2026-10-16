@@ -1,5 +1,4 @@
 export {
-  CategoryCheckboxes,
   Footer,
   Loading,
   Navbar,

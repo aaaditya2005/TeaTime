@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../services/api.js";
 import { useSession } from "../context/SessionContext.jsx";
-import { CategoryCheckboxes, PasswordField } from "../components/Common.jsx";
+import { PasswordField } from "../components/Common.jsx";
 
 export function LoginPage() {
   const { setUser, setNotice } = useSession();
@@ -87,7 +87,6 @@ export function SignupPage() {
               <div className="mb-3"><label htmlFor="email" className="form-label">Email</label><input id="email" type="email" name="email" className="form-control" required /></div>
               <PasswordField show={showPassword} toggle={() => setShowPassword(value => !value)} />
               <div className="mb-3"><label htmlFor="profileImage" className="form-label">Profile Picture</label><input id="profileImage" type="file" name="profileImage" accept="image/png,image/jpeg" className="form-control" /></div>
-              <CategoryCheckboxes />
               <button className="btn custom-btn primary-btn w-100" id="signup" disabled={busy}>{busy ? "Creating account..." : "Signup"}</button>
             </form>
           </div>

@@ -204,8 +204,28 @@ main:has(.hero){
     max-width:100%;
 }
 .profile-post-img{
-    height:15rem;
+    width:100%;
+    max-width:none;
+    height:auto;
+    aspect-ratio:16 / 9;
     object-fit:cover;
+}
+.profile-post-link{
+    display:block;
+    min-width:0;
+    padding:0;
+    border-radius:0;
+}
+.profile-post-card{
+    overflow:hidden;
+}
+.profile-post-card .card-body{
+    padding:.55rem .7rem;
+}
+.profile-post-title{
+    margin:0;
+    font-size:.9rem;
+    line-height:1.35;
 }
 
 @media (max-width:768px){

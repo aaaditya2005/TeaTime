@@ -47,7 +47,6 @@ async function migrate(){
                         currentStreak:user.currentStreak||0,
                         highestStreak:user.highestStreak||0,
                         lastLoginDate:user.lastLoginDate||null,
-                        preferredCategories:user.preferredCategories||[],
                         profileImage:user.profileImage||undefined,
                         bio:user.bio||null,
                     }

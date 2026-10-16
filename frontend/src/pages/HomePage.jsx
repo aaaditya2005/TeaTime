@@ -15,11 +15,9 @@ export default function HomePage() {
             {user ? "Explore yourself!" : "Login/Signup"}
           </Link>
         </div>
-        {(!user || user.preferredCategories?.includes("news")) && (
-          <div className="news">
-            <Link className="btn index-btn" id="news" to="/news">Know What's happening?!</Link>
-          </div>
-        )}
+        <div className="news">
+          <Link className="btn index-btn" id="news" to="/news">Know What's happening?!</Link>
+        </div>
       </div>
     </section>
   );

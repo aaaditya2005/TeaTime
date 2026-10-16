@@ -11,13 +11,12 @@ datasource db {
 model User {
   id                  String     @id @default(cuid())
   username            String     @unique
-  email               String
+  email               String     @unique
   passwordHash        String
   passwordSalt        String
   currentStreak       Int        @default(0)
   highestStreak        Int        @default(0)
   lastLoginDate        DateTime?
-  preferredCategories String[]   @default([])
   profileImage         Json       @default("{\"url\":\"https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg\",\"filename\":\"default-profile\"}")
   bio                  String?    @db.VarChar(150)
   feeds                Feed[]

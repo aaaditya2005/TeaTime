@@ -11,7 +11,7 @@ module.exports.isLoggedIn=(req,res,next)=>{
 
 module.exports.normalizeFeedBody=(req,res,next)=>{
     const body=req.body.feed||req.body;
-    req.body={...req.body,feed:{
+    req.body={feed:{
         title:body.title??req.body["feed[title]"],
         description:body.description??req.body["feed[description]"],
         category:body.category??req.body["feed[category]"],

@@ -5,21 +5,25 @@ const publicUser=require("../utils/publicUser.js");
 
 module.exports.signup=async(req, res,next)=>{
     try{
-        let {username,email,password,preferredCategories}=req.body;
+        let {username,email,password}=req.body;
+        email=String(email||"").trim().toLowerCase();
+        if(!email){
+            return res.status(400).json({error:"Email is required."});
+        }
+        const existingEmail=await prisma.user.findFirst({
+            where:{email:{equals:email,mode:"insensitive"}},
+            select:{id:true},
+        });
+        if(existingEmail){
+            return res.status(409).json({error:"An account with this email already exists."});
+        }
         if(typeof(req.file)!=="undefined"){
             req.body.profileImage={url:req.file.path,filename:req.file.filename};
-        }
-        if(!preferredCategories){
-            return res.status(400).json({error:"Please select at least one preferred category."});
-        }
-        if(!Array.isArray(preferredCategories)){
-            preferredCategories=[preferredCategories];
         }
         const passwordFields=await hashPassword(password);
         const data={
             email,
             username,
-            preferredCategories,
             passwordHash:passwordFields.hash,
             passwordSalt:passwordFields.salt,
             ...(req.body.profileImage?{profileImage:req.body.profileImage}:{})
@@ -32,6 +36,9 @@ module.exports.signup=async(req, res,next)=>{
             return res.status(201).json({user:publicUser(registeredUser),message:"Welcome to It's TeaTime."});
         })
     }catch(e){
+        if(e.code==="P2002"){
+            return res.status(409).json({error:"That email or username is already in use."});
+        }
         return res.status(400).json({error:e.message});
     }
 }
@@ -85,27 +92,33 @@ module.exports.profile=async(req,res)=>{
 }
 
 module.exports.userUpdate=async(req,res,next)=>{
-    const data={username:req.body.username,email:req.body.email};
-    if(req.body.preferredCategories){
-        data.preferredCategories=Array.isArray(req.body.preferredCategories)?req.body.preferredCategories:[req.body.preferredCategories];
-    }else{
-        data.preferredCategories=["motivational"];
+    const username=String(req.body.username||"").trim();
+    if(!username){
+        return res.status(400).json({error:"Username is required."});
     }
-    if(req.file){
-        const oldImage=req.user.profileImage;
-        if(oldImage&&oldImage.filename&&oldImage.filename!=="default-profile"){
-            await cloudinary.uploader.destroy(oldImage.filename);
+    const data={username};
+    try{
+        if(req.file){
+            const oldImage=req.user.profileImage;
+            if(oldImage&&oldImage.filename&&oldImage.filename!=="default-profile"){
+                await cloudinary.uploader.destroy(oldImage.filename);
+            }
+            data.profileImage={
+                url:req.file.path,
+                filename:req.file.filename,
+            };
         }
-        data.profileImage={
-            url:req.file.path,
-            filename:req.file.filename,
-        };
+        const user=await prisma.user.update({where:{id:req.user.id},data});
+        req.login(user,(err)=>{
+            if(err){
+                return next(err);
+            }
+            return res.json({user:publicUser(user),message:"Profile updated successfully."});
+        });
+    }catch(error){
+        if(error.code==="P2002"){
+            return res.status(409).json({error:"That username is already in use."});
+        }
+        return next(error);
     }
-    const user=await prisma.user.update({where:{id:req.user.id},data});
-    req.login(user,(err)=>{
-        if(err){
-            return next(err);
-        }
-        return res.json({user:publicUser(user),message:"Profile updated successfully."});
-    })
 }

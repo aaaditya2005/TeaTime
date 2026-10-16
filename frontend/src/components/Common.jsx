@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, Navigate, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../services/api.js";
-import { categoryOptions, useSession } from "../context/SessionContext.jsx";
+import { categoryOptions } from "../constants/categories.js";
+import { useSession } from "../context/SessionContext.jsx";
 
 export function Notice({ notice, dismiss }) {
   return (
@@ -17,9 +18,7 @@ export function Navbar() {
   const [expanded, setExpanded] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const navigate = useNavigate();
-  const categories = user?.preferredCategories?.length
-    ? user.preferredCategories
-    : ["motivational", "fitness", "spiritual", "news", "natural-fact"];
+  const categories = categoryOptions.map(([value]) => value);
 
   async function logout() {
     try {
@@ -143,30 +142,16 @@ export function PasswordField({ show, toggle }) {
   );
 }
 
-export function CategoryCheckboxes({ selected = [] }) {
-  return (
-    <fieldset className="mb-3">
-      <legend className="form-label">Preferred Categories</legend>
-      {categoryOptions.map(([value,label]) => (
-        <div className="form-check" key={value}>
-          <input className="form-check-input" type="checkbox" name="preferredCategories" value={value} id={`category-${value}`} defaultChecked={selected.includes(value)} />
-          <label className="form-check-label" htmlFor={`category-${value}`}>{label}</label>
-        </div>
-      ))}
-    </fieldset>
-  );
-}
-
 export function PostGrid({ title, posts }) {
   return (
     <>
       <h3>{posts.length} {title}</h3>
-      <div className="row row-cols-lg-4 row-cols-md-2 row-cols-sm-1 mt-3">
+      <div className="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mt-3 profile-post-grid">
         {posts.map(post => (
-          <Link to={`/feed/${post.id}`} className="nav-link" key={post.id}>
-            <div className="card mb-3 h-100">
+          <Link to={`/feed/${post.id}`} className="profile-post-link" key={post.id}>
+            <div className="card profile-post-card h-100">
               <img src={post.image?.url || "/images/default.png"} className="card-img-top profile-post-img" alt={post.title} />
-              <div className="card-body"><h5>{post.title}</h5></div>
+              <div className="card-body"><h5 className="profile-post-title">{post.title}</h5></div>
             </div>
           </Link>
         ))}

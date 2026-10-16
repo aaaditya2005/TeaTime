@@ -2,10 +2,11 @@ const prisma=require("../config/prisma.js");
 
 module.exports.createReview=async(req, res)=>{
     let {id}=req.params;
-    await prisma.review.create({
-        data:{comment:req.body.review.comment,feedId:id,authorId:req.user.id}
+    const review=await prisma.review.create({
+        data:{comment:req.body.review.comment,feedId:id,authorId:req.user.id},
+        include:{author:{select:{id:true,username:true}}},
     });
-    res.status(201).json({message:"Comment added."});
+    res.status(201).json({review,message:"Comment added."});
 }
 
 module.exports.destroyReview=async(req, res)=>{

@@ -10,6 +10,7 @@ export default function TodayPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [comment, setComment] = useState("");
+  const [liking, setLiking] = useState(false);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
@@ -23,20 +24,38 @@ export default function TodayPage() {
 
   async function toggleLike() {
     if (!user) return navigate("/user/login");
+    if (liking) return;
+    const previousData=data;
+    const nextIsLiked=!data.isLiked;
+    setLiking(true);
+    setData(current=>({
+      ...current,
+      isLiked:nextIsLiked,
+      feed:{...current.feed,likes:current.feed.likes+(nextIsLiked?1:-1)},
+    }));
     try {
       const result = await api(`/feed/${data.feed.id}/like`, { method: "POST" });
       setData(current => ({ ...current, isLiked: result.isLiked, feed: { ...current.feed, likes: result.likes } }));
     } catch (reason) {
+      setData(previousData);
       setNotice({ type: "danger", text: reason.message });
+    } finally {
+      setLiking(false);
     }
   }
 
   async function addComment(event) {
     event.preventDefault();
     if (!user) return navigate("/user/login");
+    const normalizedComment=comment.trim();
+    if(!normalizedComment) return;
     setBusy(true);
     try {
-      await api(`/feed/${data.feed.id}/reviews`, { method: "POST", body: { review: { comment } } });
+      const result=await api(`/feed/${data.feed.id}/reviews`, { method: "POST", body: { review: { comment:normalizedComment } } });
+      setData(current=>({
+        ...current,
+        feed:{...current.feed,reviews:[...current.feed.reviews,result.review]},
+      }));
       setComment("");
       setNotice({ type: "success", text: "Comment added." });
     } catch (reason) {
@@ -58,16 +77,26 @@ export default function TodayPage() {
         <p className="card-text">{feed.description}</p>
         <Link to={`/feed/${feed.id}`}>Read more</Link>
         <div className="my-3">
-          <button className="btn border-0 bg-transparent" type="button" onClick={toggleLike} aria-label={data.isLiked ? "Unlike post" : "Like post"}>
+          <button className="btn border-0 bg-transparent" type="button" onClick={toggleLike} disabled={liking} aria-pressed={data.isLiked} aria-label={data.isLiked ? "Unlike post" : "Like post"}>
             <i className={data.isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart"} />
             <br />{feed.likes}
           </button>
         </div>
         <h4>Comment</h4>
         <form onSubmit={addComment}>
-          <input className="form-control" value={comment} onChange={event => setComment(event.target.value)} required placeholder="Add a comment" />
-          <button id="comment" className="btn custom-btn mt-2" disabled={busy}>Comment</button>
+          <input className="form-control" value={comment} onChange={event => setComment(event.target.value)} disabled={busy} required placeholder="Add a comment" />
+          <button id="comment" className="btn custom-btn mt-2" disabled={busy || !comment.trim()}>{busy ? "Posting..." : "Comment"}</button>
         </form>
+        {feed.reviews.length > 0 && (
+          <div className="today-comments mt-3" aria-live="polite">
+            <h5>{feed.reviews.length} {feed.reviews.length === 1 ? "comment" : "comments"}</h5>
+            {feed.reviews.slice(-3).map(review => (
+              <p className="mb-2" key={review.id}>
+                <strong>{review.author?.username || "Former user"}:</strong> {review.comment}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

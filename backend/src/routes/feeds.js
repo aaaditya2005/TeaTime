@@ -18,14 +18,20 @@ router.get("/:category", wrapAsync(async (req, res) => {
         today.getTime() / (1000 * 60 * 60 * 24)
     );
 
-    const feed = feeds[dayNumber % feeds.length];
-    let isLiked = false;
+    const selectedFeed=feeds[dayNumber % feeds.length];
+    const [reviews,isLiked]=await Promise.all([
+        prisma.review.findMany({
+            where:{feedId:selectedFeed.id},
+            include:{author:{select:{id:true,username:true}}},
+            orderBy:{createdAt:"asc"},
+        }),
+        req.user
+            ? prisma.feedLike.findUnique({where:{userId_feedId:{userId:req.user.id,feedId:selectedFeed.id}}})
+            : null,
+    ]);
+    const {likedBy,...feed}=selectedFeed;
 
-    if(req.user){
-        isLiked=feed.likedBy.some(like=>like.userId===req.user.id);
-    }
-
-    res.json({feed,isLiked});
+    res.json({feed:{...feed,reviews},isLiked:Boolean(isLiked)});
 }));
 
 module.exports=router;

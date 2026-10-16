@@ -296,6 +296,36 @@ By regularly expressing gratitude, individuals develop a more positive outlook a
 This practice can reduce anxiety, improve concentration, and enhance emotional regulation. Many people incorporate mindfulness into activities such as walking, eating, or meditation.
 
 Living mindfully allows individuals to experience life more fully and develop a greater sense of peace and clarity.`
+},
+{
+  title: "The Silk Roads Carried More Than Goods",
+  description: "Trade routes also connected people, ideas, and traditions across regions.",
+  image: {
+    url: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2",
+    filename: "culture-history-silk-roads"
+  },
+  category: "culture-history",
+  likes: 0,
+  info: `The Silk Roads were a changing network of routes connecting communities across Asia, the Middle East, North Africa, and Europe. They were not one road, but many paths used by merchants, travelers, and diplomats over centuries.
+
+Silk, spices, ceramics, and other goods moved along these routes. So did ideas, technologies, stories, artistic styles, and religious traditions. Different communities adapted what they encountered, creating new forms of exchange and influence.
+
+Looking at the Silk Roads as a network helps us see history as connected: local places were part of much wider conversations between people and cultures.`
+},
+{
+  title: "The Swahili Coast Connected Communities",
+  description: "East African port cities grew through local culture and Indian Ocean exchange.",
+  image: {
+    url: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5",
+    filename: "culture-history-swahili-coast"
+  },
+  category: "culture-history",
+  likes: 0,
+  info: `For centuries, towns along East Africa's Swahili Coast took part in Indian Ocean trade. Sailors and merchants connected these ports with Arabia, Persia, India, and communities farther east, carrying goods as well as customs and ideas.
+
+Swahili culture developed from deep African roots alongside centuries of exchange. The Swahili language is Bantu, with loanwords from languages including Arabic reflecting some of those historical contacts.
+
+The coast's history is a reminder that cultural exchange is not one-way: communities adapt outside influences and shape them into something distinctly their own.`
 }
 ];
 

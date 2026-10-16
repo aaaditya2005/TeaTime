@@ -14,6 +14,8 @@ export default function FeedPage() {
   const [answer, setAnswer] = useState("");
   const [asking, setAsking] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [liking, setLiking] = useState(false);
+  const [deletingReviews, setDeletingReviews] = useState(() => new Set());
   const navigate = useNavigate();
 
   async function loadFeed() {
@@ -30,15 +32,39 @@ export default function FeedPage() {
     loadFeed();
   }, [id]);
 
+  async function toggleLike() {
+    if (!user) return navigate("/user/login");
+    if (liking) return;
+    const previousData=data;
+    const nextIsLiked=!data.isLiked;
+    setLiking(true);
+    setData(current=>({
+      ...current,
+      isLiked:nextIsLiked,
+      feed:{...current.feed,likes:current.feed.likes+(nextIsLiked?1:-1)},
+    }));
+    try {
+      const result=await api(`/feed/${id}/like`,{method:"POST"});
+      setData(current=>({...current,isLiked:result.isLiked,feed:{...current.feed,likes:result.likes}}));
+    }catch(reason){
+      setData(previousData);
+      setNotice({type:"danger",text:reason.message});
+    }finally{
+      setLiking(false);
+    }
+  }
+
   async function addComment(event) {
     event.preventDefault();
     if (!user) return navigate("/user/login");
+    const normalizedComment=comment.trim();
+    if(!normalizedComment) return;
     setPosting(true);
     try {
-      await api(`/feed/${id}/reviews`, { method: "POST", body: { review: { comment } } });
+      const result=await api(`/feed/${id}/reviews`, { method: "POST", body: { review: { comment:normalizedComment } } });
+      setData(current=>({...current,feed:{...current.feed,reviews:[...current.feed.reviews,result.review]}}));
       setComment("");
       setNotice({ type: "success", text: "Comment added." });
-      await loadFeed();
     } catch (reason) {
       setNotice({ type: "danger", text: reason.message });
     } finally {
@@ -47,12 +73,20 @@ export default function FeedPage() {
   }
 
   async function deleteReview(reviewId) {
+    if(deletingReviews.has(reviewId)) return;
+    setDeletingReviews(current=>new Set(current).add(reviewId));
     try {
       await api(`/feed/${id}/reviews/${reviewId}`, { method: "DELETE" });
-      await loadFeed();
+      setData(current=>({...current,feed:{...current.feed,reviews:current.feed.reviews.filter(review=>review.id!==reviewId)}}));
       setNotice({ type: "success", text: "Comment deleted." });
     } catch (reason) {
       setNotice({ type: "danger", text: reason.message });
+    } finally {
+      setDeletingReviews(current=>{
+        const next=new Set(current);
+        next.delete(reviewId);
+        return next;
+      });
     }
   }
 
@@ -94,7 +128,12 @@ export default function FeedPage() {
       <img src={feed.image.url} className="single-feed-img" alt={feed.title} />
       <h3>{feed.description}</h3>
       <p className="feed-info">{feed.info}</p>
-      <p>Likes: {feed.likes}</p>
+      <div className="post-like-control">
+        <button className="btn border-0 bg-transparent" type="button" onClick={toggleLike} disabled={liking} aria-pressed={data.isLiked} aria-label={data.isLiked ? "Unlike post" : "Like post"}>
+          <i className={data.isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart"} />
+        </button>
+        <span>{feed.likes} {feed.likes === 1 ? "Like" : "Likes"}</span>
+      </div>
       {ownsFeed && (
         <div className="modification-button">
           <Link to={`/feed/${id}/edit`} id="edit" className="btn">Edit</Link>
@@ -118,8 +157,8 @@ export default function FeedPage() {
       <section className="comment-section">
         <h4>{feed.reviews.length} Comments</h4>
         <form onSubmit={addComment}>
-          <input className="form-control" value={comment} onChange={event => setComment(event.target.value)} required placeholder="Add a comment" />
-          <button id="comment" className="btn custom-btn mt-2" disabled={posting}>Comment</button>
+          <input className="form-control" value={comment} onChange={event => setComment(event.target.value)} disabled={posting} required placeholder="Add a comment" />
+          <button id="comment" className="btn custom-btn mt-2" disabled={posting || !comment.trim()}>{posting ? "Posting..." : "Comment"}</button>
         </form>
         <div className="row mt-3">
           {feed.reviews.map(review => (
@@ -128,8 +167,8 @@ export default function FeedPage() {
                 <div className="d-flex justify-content-between align-items-center p-2">
                   <div className="card-title"><i className="fa-solid fa-circle-user" /> {review.author?.username || "Former user"}</div>
                   {user?.id === review.authorId && (
-                    <button className="btn" type="button" aria-label="Delete comment" onClick={() => deleteReview(review.id)}>
-                      <i className="fa-solid fa-trash" style={{ color: "#ff7f2a" }} />
+                    <button className="btn" type="button" aria-label="Delete comment" onClick={() => deleteReview(review.id)} disabled={deletingReviews.has(review.id)}>
+                      <i className={`fa-solid ${deletingReviews.has(review.id) ? "fa-spinner fa-spin" : "fa-trash"}`} style={{ color: "#ff7f2a" }} />
                     </button>
                   )}
                 </div>

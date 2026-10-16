@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api.js";
-import { categoryOptions, useSession } from "../context/SessionContext.jsx";
+import { categoryOptions } from "../constants/categories.js";
+import { useSession } from "../context/SessionContext.jsx";
 import { Loading, PageMessage } from "../components/Common.jsx";
 
 export default function FeedEditor({ editing = false }) {
