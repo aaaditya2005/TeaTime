@@ -8,7 +8,7 @@ export function PrivacyPage() {
       <section className="mt-4">
         <h2>Privacy Policy</h2>
         <h3 className="h5 mt-3">Information used by the app</h3>
-        <p>TeaTime stores account details such as your username, email address, password hash, and profile image. It also stores content you create, reviews, likes, login streaks, and the session needed to keep you signed in.</p>
+        <p>TeaTime stores account details such as your username, email address, password hash, and profile image. It also stores content you create, reviews, likes, posting streaks, and the session needed to keep you signed in.</p>
         <h3 className="h5 mt-3">How information is used</h3>
         <p>This information is used to provide sign-in, personalized feeds, profiles, posts, reviews, likes, and session continuity. Passwords are stored as hashes rather than readable passwords.</p>
         <h3 className="h5 mt-3">Third-party services</h3>

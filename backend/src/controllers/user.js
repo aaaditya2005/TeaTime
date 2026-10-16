@@ -6,6 +6,13 @@ const publicUser=require("../utils/publicUser.js");
 module.exports.signup=async(req, res,next)=>{
     try{
         let {username,email,password}=req.body;
+        username=String(username||"").trim();
+        if(!username){
+            return res.status(400).json({error:"Username is required."});
+        }
+        if(username.length<6){
+            return res.status(400).json({error:"Username must be at least 6 characters long."});
+        }
         email=String(email||"").trim().toLowerCase();
         if(!email){
             return res.status(400).json({error:"Email is required."});
@@ -43,38 +50,24 @@ module.exports.signup=async(req, res,next)=>{
     }
 }
 
-module.exports.login=async(req,res,next)=>{
-    const user=req.user;
-    const today=new Date();
-    today.setHours(0,0,0,0);
-
-    if(user.lastLoginDate){
-        const lastLogin=new Date(user.lastLoginDate);
-        lastLogin.setHours(0,0,0,0);
-        const diffDays=Math.floor(
-            (today-lastLogin)/(1000*60*60*24)
-        );
-        if(diffDays===1){
-            user.currentStreak+=1;
-        }
-        else if(diffDays>1){
-            user.currentStreak=1;
-        }
+module.exports.usernameAvailability=async(req,res)=>{
+    const username=String(req.query.username||"").trim();
+    if(!username){
+        return res.json({available:false});
     }
-    else{
-        user.currentStreak=1;
+    if(username.length<6){
+        return res.status(400).json({error:"Username must be at least 6 characters long."});
     }
-    user.highestStreak=Math.max(
-        user.highestStreak,
-        user.currentStreak
-    );
-    user.lastLoginDate=today;
-    const updatedUser=await prisma.user.update({
-        where:{id:user.id},
-        data:{currentStreak:user.currentStreak,highestStreak:user.highestStreak,lastLoginDate:today}
+    const existingUser=await prisma.user.findUnique({
+        where:{username},
+        select:{id:true},
     });
-    req.user=updatedUser;
-    res.json({user:publicUser(updatedUser),message:"Welcome back to It's TeaTime."});
+    res.set("Cache-Control","no-store");
+    res.json({available:!existingUser});
+}
+
+module.exports.login=async(req,res,next)=>{
+    res.json({user:publicUser(req.user),message:"Welcome back to It's TeaTime."});
 }
 
 module.exports.profile=async(req,res)=>{
@@ -95,6 +88,9 @@ module.exports.userUpdate=async(req,res,next)=>{
     const username=String(req.body.username||"").trim();
     if(!username){
         return res.status(400).json({error:"Username is required."});
+    }
+    if(username.length<6){
+        return res.status(400).json({error:"Username must be at least 6 characters long."});
     }
     const data={username};
     try{

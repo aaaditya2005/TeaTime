@@ -15,7 +15,9 @@ export function ProfilePage() {
   if (error) return <PageMessage title="Profile unavailable" text={error} />;
   if (!profile) return <Loading />;
   const { user, createdPosts, likedPosts, totalLikesReceived } = profile;
-  const progress = user.highestStreak > 0 ? Math.min(100, (user.currentStreak / user.highestStreak) * 100) : 0;
+  const currentPostStreak=user.currentPostStreak??0;
+  const highestPostStreak=user.highestPostStreak??0;
+  const progress = highestPostStreak > 0 ? Math.min(100, (currentPostStreak / highestPostStreak) * 100) : 0;
 
   return (
     <div className="container-fluid py-1 px-4">
@@ -24,9 +26,9 @@ export function ProfilePage() {
         <div className="col-lg-3 col-md-4 col-12 text-center text-md-start mt-md-0"><h2>{user.username}</h2><p>{user.email}</p></div>
         <div className="col-lg-7 col-md-5 col-12 mt-3 mt-md-0">
           <div className="card p-3">
-            <h4>Streak Progress</h4>
-            <div className="d-flex justify-content-between"><span>Current: {user.currentStreak} days</span><span>Record: {user.highestStreak} days</span></div>
-            <div className="progress mt-3" style={{ height: 25 }}><div className="progress-bar" role="progressbar" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100" style={{ width: `${progress}%` }}>{user.currentStreak} days</div></div>
+            <h4>Posting Streak</h4>
+            <div className="d-flex justify-content-between"><span>Current: {currentPostStreak} days</span><span>Record: {highestPostStreak} days</span></div>
+            <div className="progress mt-3" style={{ height: 25 }}><div className="progress-bar" role="progressbar" aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100" style={{ width: `${progress}%` }}>{currentPostStreak} days</div></div>
           </div>
         </div>
       </div>
@@ -67,7 +69,7 @@ export function ProfileEditor() {
           <h2>Edit your Profile</h2>
           {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={submit} encType="multipart/form-data">
-            <div className="mb-3"><label htmlFor="username" className="form-label">Username</label><input id="username" name="username" className="form-control" defaultValue={user.username} required /></div>
+            <div className="mb-3"><label htmlFor="username" className="form-label">Username</label><input id="username" name="username" className="form-control" defaultValue={user.username} minLength={6} required /></div>
             <div className="mb-3"><h4>Current uploaded image</h4><img className="current-feed-img" src={user.profileImage?.url || "/images/default.png"} alt="Current profile" /></div>
             <div className="mb-3"><label htmlFor="profileImage" className="form-label">Profile Picture</label><input id="profileImage" type="file" name="profileImage" accept="image/png,image/jpeg" className="form-control" /></div>
             <button className="custom-btn btn" id="save" disabled={saving}>{saving ? "Saving..." : "Save"}</button>

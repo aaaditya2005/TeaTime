@@ -168,18 +168,6 @@ main:has(.hero){
     border-radius:10px;
 }
 
-#edit{
-    background-color:#163E82 ;
-    color: white;
-    margin-bottom: 10px;
-}
-#delete{
-    background-color: red;
-    color: white;
-    margin-bottom: 10px;
-}
-
-
 @media (max-width:768px){
     .today-feed{
         padding-top:1rem;

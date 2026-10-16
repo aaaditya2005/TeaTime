@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api.js";
 import { useSession } from "../context/SessionContext.jsx";
 import { Loading, PageMessage } from "../components/Common.jsx";
@@ -15,6 +15,7 @@ export default function FeedPage() {
   const [asking, setAsking] = useState(false);
   const [posting, setPosting] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(false);
   const [deletingReviews, setDeletingReviews] = useState(() => new Set());
   const navigate = useNavigate();
 
@@ -91,13 +92,16 @@ export default function FeedPage() {
   }
 
   async function deleteFeed() {
+    if (deletingPost) return;
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    setDeletingPost(true);
     try {
       await api(`/feed/${id}`, { method: "DELETE" });
       setNotice({ type: "success", text: "Post deleted successfully." });
       navigate("/user/profile");
     } catch (reason) {
       setNotice({ type: "danger", text: reason.message });
+      setDeletingPost(false);
     }
   }
 
@@ -135,9 +139,17 @@ export default function FeedPage() {
         <span>{feed.likes} {feed.likes === 1 ? "Like" : "Likes"}</span>
       </div>
       {ownsFeed && (
-        <div className="modification-button">
-          <Link to={`/feed/${id}/edit`} id="edit" className="btn">Edit</Link>
-          <button type="button" id="delete" className="btn" onClick={deleteFeed}>Delete</button>
+        <div className="post-actions">
+          <button
+            type="button"
+            className="post-delete-button"
+            title="Delete post"
+            aria-label="Delete post"
+            onClick={deleteFeed}
+            disabled={deletingPost}
+          >
+            <i className={`fa-solid ${deletingPost ? "fa-spinner fa-spin" : "fa-trash"}`} />
+          </button>
         </div>
       )}
       <section className="mt-5">

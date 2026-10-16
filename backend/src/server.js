@@ -11,7 +11,6 @@ const prisma=require("./config/prisma.js");
 const {verifyPassword}=require("./utils/password.js");
 const publicUser=require("./utils/publicUser.js");
 const feedRouter=require("./routes/feed.js");
-const feedsRouter=require("./routes/feeds.js");
 const reviewRouter=require("./routes/review.js");
 const userRouter=require("./routes/user.js");
 const newsRouter=require("./routes/news.js");
@@ -20,7 +19,7 @@ const app=express();
 const port=process.env.PORT||8080;
 const frontendDist=path.resolve(__dirname,"../../frontend/dist");
 const pool=new Pool({
-    connectionString:process.env.SESSION_DATABASE_URL||process.env.DIRECT_URL||process.env.DATABASE_URL,
+    connectionString:process.env.DATABASE_URL,
 });
 const store=new PgSession({pool,createTableIfMissing:true});
 store.on("error",err=>console.error("PostgreSQL session store error",err));
@@ -65,8 +64,7 @@ passport.deserializeUser(async(id,done)=>{
 
 app.get("/api/session",(req,res)=>res.json({user:publicUser(req.user)}));
 app.use("/api/feed/:id/reviews",reviewRouter);
-app.use("/api/feed",feedRouter);
-app.use("/api/feeds",feedsRouter);
+app.use("/api",feedRouter);
 app.use("/api/news",newsRouter);
 app.use("/api/user",userRouter);
 app.use("/api",(req,res)=>res.status(404).json({error:"API route not found."}));

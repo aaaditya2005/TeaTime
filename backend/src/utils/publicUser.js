@@ -5,9 +5,9 @@ module.exports = function publicUser(user) {
         username,
         email,
         profileImage,
-        currentStreak,
-        highestStreak,
-        lastLoginDate,
+        currentPostStreak,
+        highestPostStreak,
+        lastPostDate,
         bio,
     } = user;
     return {
@@ -15,9 +15,9 @@ module.exports = function publicUser(user) {
         username,
         email,
         profileImage,
-        currentStreak,
-        highestStreak,
-        lastLoginDate,
+        currentPostStreak,
+        highestPostStreak,
+        lastPostDate,
         bio,
     };
 };

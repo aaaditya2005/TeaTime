@@ -34,7 +34,6 @@ function AppRoutes() {
           <Route path="/feed" element={<HomePage />} />
           <Route path="/feeds/:category" element={<TodayPage />} />
           <Route path="/feed/new" element={<Protected><FeedEditor /></Protected>} />
-          <Route path="/feed/:id/edit" element={<Protected><FeedEditor editing /></Protected>} />
           <Route path="/feed/:id" element={<FeedPage />} />
           <Route path="/news" element={<NewsPage />} />
           <Route path="/user/login" element={<LoginPage />} />

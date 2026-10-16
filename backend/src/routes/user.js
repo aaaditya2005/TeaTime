@@ -16,6 +16,7 @@ const isSelf=(req,res,next)=>{
 };
 
 router.post("/signup",upload.single("profileImage"),userController.signup);
+router.get("/username-availability",userController.usernameAvailability);
 
 router.post("/login",(req,res,next)=>{
     passport.authenticate("local",(error,user,info)=>{

@@ -87,6 +87,34 @@
   transform: translateY(-50%);
 }
 
+.post-actions {
+  display: flex;
+  margin: 0.5rem 0;
+}
+
+.post-delete-button {
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  place-items: center;
+  color: #a61b1b;
+  background: #fff;
+  border: 1px solid #e2b7b7;
+  border-radius: 5px;
+}
+
+.post-delete-button:hover:not(:disabled),
+.post-delete-button:focus-visible {
+  color: #801313;
+  background: #fff3f3;
+}
+
+.post-delete-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
 @media (max-width: 991.98px) {
   .nav-actions {
     align-items: flex-start;

@@ -10,21 +10,21 @@ const upload=multer({storage});
 
 
 router
-    .route("/")
+    .route("/feed")
     .get(feedController.index)
     .post(isLoggedIn,upload.single("image"),normalizeFeedBody,validateFeed,wrapAsync(feedController.createFeed))
 
+router.get("/feeds/:category",wrapAsync(feedController.showCategoryFeed));
 
 //show route
 router
-    .route("/:id")
+    .route("/feed/:id")
     .get(wrapAsync(feedController.showFeed))
-    .put(isLoggedIn,isOwner,upload.single("image"),normalizeFeedBody,validateFeed,wrapAsync(feedController.updateFeed))
     .delete(isLoggedIn,isOwner,wrapAsync(feedController.destroyFeed))
 
-router.post("/:id/like",isLoggedIn,wrapAsync(feedController.likeFeed));
+router.post("/feed/:id/like",isLoggedIn,wrapAsync(feedController.likeFeed));
 
-router.post("/:id/ask-ai",wrapAsync(feedController.askAI));
+router.post("/feed/:id/ask-ai",wrapAsync(feedController.askAI));
 module.exports=router;
 
 
