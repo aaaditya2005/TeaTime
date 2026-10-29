@@ -11,6 +11,12 @@ function hasPostedOnUtcDate(lastPostDate,postedAt=new Date()){
     return startOfUtcDay(lastPostDate).getTime()===startOfUtcDay(postedAt).getTime();
 }
 
+function getCurrentPostingStreak(user,now=new Date()){
+    if(!user?.lastPostDate) return 0;
+    const daysSinceLastPost=Math.floor((startOfUtcDay(now)-startOfUtcDay(user.lastPostDate))/millisecondsPerDay);
+    return daysSinceLastPost<=1?user.currentPostStreak||0:0;
+}
+
 function calculatePostingStreak(user,postedAt=new Date()){
     const today=startOfUtcDay(postedAt);
     let currentPostStreak=1;
@@ -34,3 +40,5 @@ function calculatePostingStreak(user,postedAt=new Date()){
 
 module.exports=calculatePostingStreak;
 module.exports.hasPostedOnUtcDate=hasPostedOnUtcDate;
+module.exports.getCurrentPostingStreak=getCurrentPostingStreak;
+module.exports.startOfUtcDay=startOfUtcDay;

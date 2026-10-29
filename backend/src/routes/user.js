@@ -30,8 +30,11 @@ router.post("/login",(req,res,next)=>{
 });
 
 router.get("/profile",isLoggedIn,userController.profile);
+router.get("/:id/public",userController.publicProfile);
 
 router.get("/profile/edit",isLoggedIn,(req,res)=>res.json({user:publicUser(req.user)}));
+
+router.put("/language",isLoggedIn,userController.updateLanguage);
 
 router.put("/:id",isLoggedIn,isSelf,upload.single("profileImage"),userController.userUpdate);
 

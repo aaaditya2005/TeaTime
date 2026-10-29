@@ -20,9 +20,31 @@
   flex: 1 0 auto;
 }
 
+.today-own-post-note {
+  width: fit-content;
+  margin: 0 0 0.75rem;
+  padding: 0.45rem 0.7rem;
+  color: #315b3c;
+  background: #f0f6ef;
+  border-left: 3px solid #5b8a62;
+  font-size: 0.95rem;
+}
+
+.share-post-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 .nav-actions {
   position: relative;
   align-items: center;
+}
+
+.language-select {
+  width: auto;
+  min-width: 7.5rem;
+  margin-right: 0.35rem;
 }
 
 .account-toggle {
@@ -118,6 +140,11 @@
 @media (max-width: 991.98px) {
   .nav-actions {
     align-items: flex-start;
+  }
+
+  .language-select {
+    width: 100%;
+    margin: 0.25rem 0 0.5rem;
   }
 
   .account-menu {

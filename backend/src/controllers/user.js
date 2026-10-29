@@ -5,7 +5,7 @@ const publicUser=require("../utils/publicUser.js");
 
 module.exports.signup=async(req, res,next)=>{
     try{
-        let {username,email,password}=req.body;
+        let {username,email,password,preferredLanguage}=req.body;
         username=String(username||"").trim();
         if(!username){
             return res.status(400).json({error:"Username is required."});
@@ -31,6 +31,7 @@ module.exports.signup=async(req, res,next)=>{
         const data={
             email,
             username,
+            preferredLanguage:SUPPORTED_LANGUAGES.has(preferredLanguage)?preferredLanguage:"en",
             passwordHash:passwordFields.hash,
             passwordSalt:passwordFields.salt,
             ...(req.body.profileImage?{profileImage:req.body.profileImage}:{})
@@ -47,6 +48,25 @@ module.exports.signup=async(req, res,next)=>{
             return res.status(409).json({error:"That email or username is already in use."});
         }
         return res.status(400).json({error:e.message});
+    }
+}
+
+module.exports.updateLanguage=async(req,res,next)=>{
+    const {preferredLanguage}=req.body;
+    if(!SUPPORTED_LANGUAGES.has(preferredLanguage)){
+        return res.status(400).json({error:"Choose a supported language."});
+    }
+    try{
+        const user=await prisma.user.update({
+            where:{id:req.user.id},
+            data:{preferredLanguage},
+        });
+        req.login(user,error=>{
+            if(error) return next(error);
+            res.json({user:publicUser(user)});
+        });
+    }catch(error){
+        next(error);
     }
 }
 
@@ -71,9 +91,19 @@ module.exports.login=async(req,res,next)=>{
 }
 
 module.exports.profile=async(req,res)=>{
+    const postCardSelect={
+        id:true,
+        title:true,
+        category:true,
+        image:true,
+        likes:true,
+        createdAt:true,
+        lastFeaturedAt:true,
+        owner:{select:{username:true}},
+    };
     const [createdPosts,likedPosts,likesReceived]=await Promise.all([
-        prisma.feed.findMany({where:{ownerId:req.user.id}}),
-        prisma.feed.findMany({where:{likedBy:{some:{userId:req.user.id}}}}),
+        prisma.feed.findMany({where:{ownerId:req.user.id},select:postCardSelect}),
+        prisma.feed.findMany({where:{likedBy:{some:{userId:req.user.id}}},select:postCardSelect}),
         prisma.feedLike.count({where:{feed:{ownerId:req.user.id}}})
     ]);
     res.json({
@@ -82,6 +112,31 @@ module.exports.profile=async(req,res)=>{
         likedPosts,
         totalLikesReceived:likesReceived
     });
+}
+
+module.exports.publicProfile=async(req,res)=>{
+    const user=await prisma.user.findUnique({
+        where:{id:req.params.id},
+        select:{id:true,username:true,profileImage:true},
+    });
+    if(!user){
+        return res.status(404).json({error:"User is unknown."});
+    }
+    const createdPosts=await prisma.feed.findMany({
+        where:{ownerId:user.id},
+        select:{
+            id:true,
+            title:true,
+            category:true,
+            image:true,
+            likes:true,
+            createdAt:true,
+            lastFeaturedAt:true,
+            owner:{select:{username:true}},
+        },
+        orderBy:{createdAt:"desc"},
+    });
+    res.json({user,createdPosts});
 }
 
 module.exports.userUpdate=async(req,res,next)=>{
@@ -118,3 +173,5 @@ module.exports.userUpdate=async(req,res,next)=>{
         return next(error);
     }
 }
+
+const SUPPORTED_LANGUAGES=new Set(["en","hi","kn","ta","mr","te"]);

@@ -12,6 +12,7 @@ model User {
   id                  String     @id @default(cuid())
   username            String     @unique
   email               String     @unique
+  preferredLanguage   String     @default("en")
   passwordHash        String
   passwordSalt        String
   currentStreak       Int        @default(0)
@@ -38,6 +39,7 @@ model Feed {
   likes     Int        @default(0)
   info      String
   ownerId   String?
+  lastFeaturedAt DateTime?
   owner     User?      @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   reviews   Review[]
   likedBy   FeedLike[]
@@ -46,6 +48,15 @@ model Feed {
 
   @@index([category])
   @@index([ownerId])
+}
+
+model Session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("session")
 }
 
 model Review {

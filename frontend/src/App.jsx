@@ -7,7 +7,7 @@ import FeedPage from "./pages/FeedPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import NewsPage from "./pages/NewsPage.jsx";
 import { NotFoundPage, PrivacyPage } from "./pages/StaticPages.jsx";
-import { ProfileEditor, ProfilePage } from "./pages/ProfilePages.jsx";
+import { ProfileEditor, ProfilePage, PublicProfilePage } from "./pages/ProfilePages.jsx";
 import TodayPage from "./pages/TodayPage.jsx";
 import "./app.css";
 
@@ -40,6 +40,7 @@ function AppRoutes() {
           <Route path="/user/signup" element={<SignupPage />} />
           <Route path="/user/profile" element={<Protected><ProfilePage /></Protected>} />
           <Route path="/user/profile/edit" element={<Protected><ProfileEditor /></Protected>} />
+          <Route path="/users/:id" element={<PublicProfilePage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

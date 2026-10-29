@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api.js";
 import { useSession } from "../context/SessionContext.jsx";
-import { Loading, PageMessage } from "../components/Common.jsx";
+import { Loading, PageMessage, ShareButton } from "../components/Common.jsx";
+import { usePostTranslation } from "../hooks/usePostTranslation.js";
 
 export default function FeedPage() {
   const { id } = useParams();
-  const { user, setNotice } = useSession();
+  const { user, setNotice, language } = useSession();
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
+  const { content: translatedFeed, isTranslating, translationFailed } = usePostTranslation(data?.feed, language);
   const [error, setError] = useState("");
   const [comment, setComment] = useState("");
   const [question, setQuestion] = useState("");
@@ -65,7 +69,7 @@ export default function FeedPage() {
       const result=await api(`/feed/${id}/reviews`, { method: "POST", body: { review: { comment:normalizedComment } } });
       setData(current=>({...current,feed:{...current.feed,reviews:[...current.feed.reviews,result.review]}}));
       setComment("");
-      setNotice({ type: "success", text: "Comment added." });
+      setNotice({ type: "success", text: t("feed.commentAdded") });
     } catch (reason) {
       setNotice({ type: "danger", text: reason.message });
     } finally {
@@ -79,7 +83,7 @@ export default function FeedPage() {
     try {
       await api(`/feed/${id}/reviews/${reviewId}`, { method: "DELETE" });
       setData(current=>({...current,feed:{...current.feed,reviews:current.feed.reviews.filter(review=>review.id!==reviewId)}}));
-      setNotice({ type: "success", text: "Comment deleted." });
+      setNotice({ type: "success", text: t("feed.commentDeleted") });
     } catch (reason) {
       setNotice({ type: "danger", text: reason.message });
     } finally {
@@ -93,11 +97,11 @@ export default function FeedPage() {
 
   async function deleteFeed() {
     if (deletingPost) return;
-    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    if (!window.confirm(t("feed.deleteConfirm"))) return;
     setDeletingPost(true);
     try {
       await api(`/feed/${id}`, { method: "DELETE" });
-      setNotice({ type: "success", text: "Post deleted successfully." });
+      setNotice({ type: "success", text: t("feed.postDeleted") });
       navigate("/user/profile");
     } catch (reason) {
       setNotice({ type: "danger", text: reason.message });
@@ -110,7 +114,7 @@ export default function FeedPage() {
     setAsking(true);
     setAnswer("");
     try {
-      const result = await api(`/feed/${id}/ask-ai`, { method: "POST", body: { question } });
+      const result = await api(`/feed/${id}/ask-ai`, { method: "POST", body: { question, preferredLanguage: i18n.language } });
       setAnswer(result.answerHtml);
       setQuestion("");
     } catch (reason) {
@@ -120,31 +124,37 @@ export default function FeedPage() {
     }
   }
 
-  if (error) return <PageMessage title="Post unavailable" text={error} />;
+  if (error) return <PageMessage title={t("feed.unavailable")} text={error} />;
   if (!data) return <Loading />;
-  const { feed } = data;
+  const feed = data.feed;
+  const displayedFeed = translatedFeed || feed;
   const ownsFeed = user?.id === feed.ownerId;
 
   return (
     <div className="container-fluid py-4 px-4">
-      <h1>{feed.title}</h1>
-      <p className="text-muted"><i>-@{feed.owner?.username || "Former user"}</i></p>
-      <img src={feed.image.url} className="single-feed-img" alt={feed.title} />
-      <h3>{feed.description}</h3>
-      <p className="feed-info">{feed.info}</p>
+      <h1>{displayedFeed.title}</h1>
+      {feed.owner?.id
+        ? <p className="text-muted"><i>{t("feed.postBy")} <Link to={`/users/${encodeURIComponent(feed.owner.id)}`}>{feed.owner.username}</Link></i></p>
+        : <p className="text-muted"><i>{t("feed.unknownUser")}</i></p>}
+      {isTranslating && <p role="status">{t("feed.translating")}</p>}
+      {translationFailed && <p className="text-muted" role="status">{t("feed.translationUnavailable")}</p>}
+      <img src={feed.image.url} className="single-feed-img" alt={displayedFeed.title} />
+      <h3>{displayedFeed.description}</h3>
+      <p className="feed-info">{displayedFeed.info}</p>
       <div className="post-like-control">
-        <button className="btn border-0 bg-transparent" type="button" onClick={toggleLike} disabled={liking} aria-pressed={data.isLiked} aria-label={data.isLiked ? "Unlike post" : "Like post"}>
+        <button className="btn border-0 bg-transparent" type="button" onClick={toggleLike} disabled={liking} aria-pressed={data.isLiked} aria-label={t(data.isLiked ? "feed.unlike" : "feed.likePost")}>
           <i className={data.isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart"} />
         </button>
-        <span>{feed.likes} {feed.likes === 1 ? "Like" : "Likes"}</span>
+        <span>{feed.likes} {t(feed.likes === 1 ? "feed.like" : "feed.likes")}</span>
       </div>
+      <ShareButton url={`/feed/${feed.id}`} title={displayedFeed.title} />
       {ownsFeed && (
         <div className="post-actions">
           <button
             type="button"
             className="post-delete-button"
-            title="Delete post"
-            aria-label="Delete post"
+            title={t("feed.deletePost")}
+            aria-label={t("feed.deletePost")}
             onClick={deleteFeed}
             disabled={deletingPost}
           >
@@ -153,33 +163,33 @@ export default function FeedPage() {
         </div>
       )}
       <section className="mt-5">
-        <h4>Ask AI about this post</h4>
+        <h4>{t("feed.askAiTitle")}</h4>
         <form onSubmit={askAI}>
-          <textarea className="form-control" rows="3" value={question} onChange={event => setQuestion(event.target.value)} placeholder="Ask anything about this post..." required />
-          <button className="btn custom-btn mt-3" disabled={asking}>{asking ? "Thinking..." : "Ask AI"}</button>
+          <textarea className="form-control" rows="3" value={question} onChange={event => setQuestion(event.target.value)} placeholder={t("feed.askAnything")} required />
+          <button className="btn custom-btn mt-3" disabled={asking}>{asking ? t("feed.thinking") : t("feed.askAi")}</button>
         </form>
         {answer && (
           <div className="ai-card mt-4">
-            <strong>It's TeaTime AI</strong><hr />
+            <strong>{t("feed.aiName")}</strong><hr />
             <div className="ai-answer" dangerouslySetInnerHTML={{ __html: answer }} />
           </div>
         )}
       </section>
       <hr />
       <section className="comment-section">
-        <h4>{feed.reviews.length} Comments</h4>
+        <h4>{feed.reviews.length} {t(feed.reviews.length === 1 ? "feed.commentSingular" : "feed.commentPlural")}</h4>
         <form onSubmit={addComment}>
-          <input className="form-control" value={comment} onChange={event => setComment(event.target.value)} disabled={posting} required placeholder="Add a comment" />
-          <button id="comment" className="btn custom-btn mt-2" disabled={posting || !comment.trim()}>{posting ? "Posting..." : "Comment"}</button>
+          <input className="form-control" value={comment} onChange={event => setComment(event.target.value)} disabled={posting} required placeholder={t("feed.addComment")} />
+          <button id="comment" className="btn custom-btn mt-2" disabled={posting || !comment.trim()}>{posting ? t("feed.posting") : t("feed.comment")}</button>
         </form>
         <div className="row mt-3">
           {feed.reviews.map(review => (
             <div className="col-lg-4 col-md-6 col-12 mb-3" key={review.id}>
               <div className="card h-100">
                 <div className="d-flex justify-content-between align-items-center p-2">
-                  <div className="card-title"><i className="fa-solid fa-circle-user" /> {review.author?.username || "Former user"}</div>
+                  {review.author?.username && <div className="card-title"><i className="fa-solid fa-circle-user" /> {review.author.username}</div>}
                   {user?.id === review.authorId && (
-                    <button className="btn" type="button" aria-label="Delete comment" onClick={() => deleteReview(review.id)} disabled={deletingReviews.has(review.id)}>
+                    <button className="btn" type="button" aria-label={t("feed.deleteComment")} onClick={() => deleteReview(review.id)} disabled={deletingReviews.has(review.id)}>
                       <i className={`fa-solid ${deletingReviews.has(review.id) ? "fa-spinner fa-spin" : "fa-trash"}`} style={{ color: "#ff7f2a" }} />
                     </button>
                   )}

@@ -1,11 +1,13 @@
+const {getCurrentPostingStreak}=require("./postingStreak.js");
+
 module.exports = function publicUser(user) {
     if (!user) return null;
     const {
         id,
         username,
         email,
+        preferredLanguage,
         profileImage,
-        currentPostStreak,
         highestPostStreak,
         lastPostDate,
         bio,
@@ -14,8 +16,9 @@ module.exports = function publicUser(user) {
         id,
         username,
         email,
+        preferredLanguage,
         profileImage,
-        currentPostStreak,
+        currentPostStreak:getCurrentPostingStreak(user),
         highestPostStreak,
         lastPostDate,
         bio,
